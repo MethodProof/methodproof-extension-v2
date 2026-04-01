@@ -1,0 +1,55 @@
+body {
+  width: 240px;
+  padding: 16px;
+  font-family: Inter, system-ui, sans-serif;
+  margin: 0;
+  background: #faf9f7;
+  color: #0a0a0a;
+}
+
+h1 {
+  font-size: 14px;
+  margin: 0 0 12px;
+  font-weight: 600;
+}
+
+.status {
+  font-size: 13px;
+  padding: 6px 10px;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.connected {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.disconnected {
+  background: #f5f5f5;
+  color: #757575;
+}
+
+.session-id {
+  font-size: 11px;
+  font-family: "IBM Plex Mono", monospace;
+  color: #666;
+  margin-bottom: 12px;
+  word-break: break-all;
+}
+
+.btn {
+  width: 100%;
+  padding: 8px;
+  border: 2px solid #0a0a0a;
+  background: #d93326;
+  color: #faf9f7;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #0a0a0a;
+}
+
+.btn:hover {
+  background: #b71c1c;
+}
