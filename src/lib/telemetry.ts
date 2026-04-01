@@ -65,8 +65,31 @@ export async function flushEvents(): Promise<void> {
   }
 }
 
-/** Send batch to API with exponential backoff retry */
+const LOCAL_BRIDGE = "http://localhost:9877";
+
+/** Try local bridge first (methodproof CLI running locally), fall back to platform API */
 async function sendBatch(session: SessionState, events: BrowserEvent[]): Promise<boolean> {
+  // Try local bridge (CLI offline mode)
+  try {
+    const probe = await fetch(`${LOCAL_BRIDGE}/session`, { signal: AbortSignal.timeout(500) });
+    if (probe.ok) {
+      const data = (await probe.json()) as { active: boolean };
+      if (data.active) {
+        const resp = await fetch(`${LOCAL_BRIDGE}/events`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ events }),
+        });
+        if (resp.ok) {
+          logger.info("telemetry.flush.local", { count: events.length });
+          return true;
+        }
+      }
+    }
+  } catch {
+    // Local bridge not running — fall through to platform API
+  }
+
   const url = `${session.api_base}/sessions/${session.session_id}/browser-events`;
 
   for (let attempt = 0; attempt <= RETRY_BACKOFFS.length; attempt++) {
