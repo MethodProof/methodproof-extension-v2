@@ -10,6 +10,7 @@
 
 import { detectDocsSite } from "../lib/docs/sites";
 import { startReading, stopReading } from "../lib/docs/reading";
+import { startSearchTracking, stopSearchTracking } from "../lib/docs/search";
 
 let active = false;
 
@@ -24,6 +25,7 @@ export async function initDocsTracker(): Promise<void> {
   if (!site) return;
   active = true;
   startReading(site, send);
+  startSearchTracking(site, send);
 }
 
 /** Destroy docs tracker — cleans up all listeners and emits pending events */
@@ -31,6 +33,7 @@ export function destroyDocsTracker(): void {
   if (!active) return;
   active = false;
   stopReading();
+  stopSearchTracking();
 }
 
 async function isEnabled(): Promise<boolean> {
