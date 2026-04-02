@@ -8,14 +8,15 @@
  *   - destroyDocsTracker() available for cleanup on deactivate
  */
 
-import { categorizeDomain } from "../lib/categorize";
+import { detectDocsSite } from "../lib/docs/sites";
 
 let active = false;
 
 /** Initialize docs tracker — activates only on documentation sites when enabled */
 export async function initDocsTracker(): Promise<void> {
   if (!(await isEnabled())) return;
-  if (categorizeDomain(location.hostname) !== "docs") return;
+  const site = detectDocsSite();
+  if (!site) return;
   active = true;
 }
 
