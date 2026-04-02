@@ -5,6 +5,7 @@ import { logger } from "./lib/logger";
 import { categorizeDomain } from "./lib/categorize";
 import { redactUrl } from "./lib/redact";
 import { bufferEvent, flushEvents, syncClock, generateEventId, syncedTimestamp } from "./lib/telemetry";
+import { computeFingerprint, encryptEventData } from "./lib/crypto";
 
 const FLUSH_ALARM = "methodproof-flush";
 let lastActiveDomain = "";
@@ -16,7 +17,7 @@ async function getSession(): Promise<SessionState | null> {
   return (result.session as SessionState | undefined) ?? null;
 }
 
-async function activateSession(sessionId: string, token: string, apiBase: string): Promise<void> {
+async function activateSession(sessionId: string, token: string, apiBase: string, e2eKey?: string): Promise<void> {
   const session: SessionState = {
     session_id: sessionId,
     token,
@@ -25,13 +26,17 @@ async function activateSession(sessionId: string, token: string, apiBase: string
     active: true,
   };
 
+  if (e2eKey) {
+    session.e2e_key = e2eKey;
+    session.e2e_fingerprint = await computeFingerprint(e2eKey);
+  }
+
   const offset = await syncClock(session);
   session.clock_offset_ms = offset;
 
   await chrome.storage.session.set({ session });
-  // Chrome clamps alarm period to minimum 30s; 10s is the design target
   await chrome.alarms.create(FLUSH_ALARM, { periodInMinutes: 10 / 60 });
-  logger.info("session.activated", { session_id: sessionId, clock_offset_ms: offset });
+  logger.info("session.activated", { session_id: sessionId, clock_offset_ms: offset, e2e: !!e2eKey });
 }
 
 async function deactivateSession(): Promise<void> {
@@ -54,7 +59,8 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
   let title = "";
   try {
     const tab = await chrome.tabs.get(details.tabId);
-    title = tab.title ?? "";
+    // Don't capture page titles from sensitive domains (banking, email, health)
+    title = category === "sensitive" ? "" : (tab.title ?? "");
   } catch (err: unknown) {
     logger.warning("capture.tab_get.failed", { error: String(err), tab_id: details.tabId });
   }
@@ -111,7 +117,7 @@ function isExtensionMessage(msg: unknown): msg is ExtensionMessage {
 async function handleMessage(message: ExtensionMessage): Promise<unknown> {
   switch (message.type) {
     case "activate":
-      await activateSession(message.session_id, message.token, message.api_base);
+      await activateSession(message.session_id, message.token, message.api_base, message.e2e_key);
       return { ok: true };
     case "deactivate":
       await deactivateSession();
@@ -119,12 +125,16 @@ async function handleMessage(message: ExtensionMessage): Promise<unknown> {
     case "content_event": {
       const session = await getSession();
       if (!session?.active) return { ok: false, reason: "no_session" };
+      let data = message.data;
+      if (session.e2e_key && session.e2e_fingerprint) {
+        data = await encryptEventData(data, session.e2e_key, session.e2e_fingerprint);
+      }
       const event: BrowserEvent = {
         event_id: generateEventId(),
         type: message.event_type,
         timestamp: syncedTimestamp(session.clock_offset_ms),
         session_id: session.session_id,
-        data: message.data,
+        data,
       };
       await bufferEvent(event);
       return { ok: true };
@@ -149,8 +159,16 @@ chrome.runtime.onMessage.addListener((message: unknown, _sender, sendResponse) =
   return true;
 });
 
-chrome.runtime.onMessageExternal.addListener((message: unknown, _sender, sendResponse) => {
+const ALLOWED_ORIGINS = /^https?:\/\/(localhost(:\d+)?|([a-z0-9-]+\.)?methodproof\.com)/;
+
+chrome.runtime.onMessageExternal.addListener((message: unknown, sender, sendResponse) => {
   if (!isExtensionMessage(message)) return;
+  const origin = sender.url ?? "";
+  if (!ALLOWED_ORIGINS.test(origin)) {
+    logger.warning("message.external.rejected", { origin });
+    sendResponse({ ok: false, error: "unauthorized_origin" });
+    return true;
+  }
   handleMessage(message)
     .then(sendResponse)
     .catch((err: unknown) => {

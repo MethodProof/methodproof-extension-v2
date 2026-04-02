@@ -3,7 +3,7 @@
 import { categorizeDomain, type DomainCategory } from "./categorize";
 import { logger } from "./logger";
 
-const SENSITIVE_PARAM = /^(auth|token|key|password|secret|session|jwt|api_key)$/i;
+const SENSITIVE_PARAM = /^(auth|token|key|password|secret|session|jwt|api_key|access_token|auth_token|sessionid|session_id|private_key|client_secret|refresh_token|code|state|nonce)$/i;
 
 /** Strip sensitive query params; redact sensitive domains to domain-only */
 export function redactUrl(rawUrl: string): { url: string; category: DomainCategory } {
