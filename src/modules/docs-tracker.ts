@@ -9,8 +9,13 @@
  */
 
 import { detectDocsSite } from "../lib/docs/sites";
+import { startReading, stopReading } from "../lib/docs/reading";
 
 let active = false;
+
+function send(eventType: string, data: Record<string, unknown>): void {
+  chrome.runtime.sendMessage({ type: "content_event", event_type: eventType, data }).catch(() => {});
+}
 
 /** Initialize docs tracker — activates only on documentation sites when enabled */
 export async function initDocsTracker(): Promise<void> {
@@ -18,12 +23,14 @@ export async function initDocsTracker(): Promise<void> {
   const site = detectDocsSite();
   if (!site) return;
   active = true;
+  startReading(site, send);
 }
 
 /** Destroy docs tracker — cleans up all listeners and emits pending events */
 export function destroyDocsTracker(): void {
   if (!active) return;
   active = false;
+  stopReading();
 }
 
 async function isEnabled(): Promise<boolean> {
