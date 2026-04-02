@@ -1,3 +1,4 @@
+import { detectMusic } from './music';
 /** MethodProof content script — copy, search, and AI chat detection */
 
 function send(eventType: string, data: Record<string, unknown>): void {
@@ -47,3 +48,4 @@ function detectAiChat(): void {
 // Run detections on page load
 detectSearch();
 detectAiChat();
+detectMusic();

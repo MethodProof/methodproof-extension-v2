@@ -1,7 +1,7 @@
 /** Domain categorization for browser telemetry */
 
 export type DomainCategory =
-  | "search" | "docs" | "code_host" | "qa" | "ai_chat"
+  | "search" | "docs" | "code_host" | "qa" | "ai_chat" | "music"
   | "cheating" | "package" | "reference" | "sensitive" | "other";
 
 const CATEGORIES: Record<string, DomainCategory> = {
@@ -35,6 +35,10 @@ const CATEGORIES: Record<string, DomainCategory> = {
   // Reference
   "wikipedia.org": "reference", "w3schools.com": "reference",
   "geeksforgeeks.org": "reference", "tutorialspoint.com": "reference",
+  // Music
+  "open.spotify.com": "music", "music.apple.com": "music",
+  "music.youtube.com": "music", "soundcloud.com": "music",
+  "listen.tidal.com": "music",
   // Sensitive (banking, email, health)
   "bank.com": "sensitive",
   "chase.com": "sensitive", "bankofamerica.com": "sensitive",
