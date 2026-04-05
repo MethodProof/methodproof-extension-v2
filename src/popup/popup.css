@@ -1,10 +1,14 @@
+/* Theme tokens — generated from methodproof-tokens/tokens.json */
+/* Run `just tokens` from monorepo root to regenerate */
+@import './tokens.css';
+
 body {
   width: 240px;
   padding: 16px;
   font-family: Inter, system-ui, sans-serif;
   margin: 0;
-  background: #faf9f7;
-  color: #0a0a0a;
+  background: var(--bg);
+  color: var(--ink);
 }
 
 h1 {
@@ -21,45 +25,45 @@ h1 {
 }
 
 .connected {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: var(--green-faint);
+  color: var(--green);
 }
 
 .disconnected {
-  background: #f5f5f5;
-  color: #757575;
+  background: var(--surface);
+  color: var(--ink-faint);
 }
 
 .session-id {
   font-size: 11px;
   font-family: "IBM Plex Mono", monospace;
-  color: #666;
+  color: var(--ink-mid);
   margin-bottom: 12px;
   word-break: break-all;
 }
 
 .capture-info {
   font-size: 10px;
-  color: #888;
+  color: var(--ink-mid);
   line-height: 1.4;
   margin-bottom: 12px;
   padding: 6px 8px;
-  background: #f5f5f5;
-  border-left: 2px solid #d93326;
+  background: var(--surface);
+  border-left: 2px solid var(--accent);
 }
 
 .btn {
   width: 100%;
   padding: 8px;
-  border: 2px solid #0a0a0a;
-  background: #d93326;
-  color: #faf9f7;
+  border: 2px solid var(--ink);
+  background: var(--accent);
+  color: var(--accent-text);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 4px 4px 0 #0a0a0a;
+  box-shadow: var(--shadow);
 }
 
 .btn:hover {
-  background: #b71c1c;
+  opacity: 0.9;
 }
