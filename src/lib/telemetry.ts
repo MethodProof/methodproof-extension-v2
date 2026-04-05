@@ -65,7 +65,7 @@ export async function flushEvents(): Promise<void> {
   }
 }
 
-const LOCAL_BRIDGE = "http://localhost:9877";
+const LOCAL_BRIDGE = "http://127.0.0.1:9877";
 
 /** Try local bridge first (methodproof CLI running locally), fall back to platform API */
 async function sendBatch(session: SessionState, events: BrowserEvent[]): Promise<boolean> {
