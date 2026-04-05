@@ -45,7 +45,35 @@ function detectAiChat(): void {
   send("browser_ai_chat", { platform });
 }
 
+// --- CLI pairing detection (localhost:9877/pair) ---
+function detectPairing(): void {
+  if (location.hostname !== "localhost" && location.hostname !== "127.0.0.1") return;
+  if (!location.port || location.port !== "9877") return;
+  if (!location.pathname.startsWith("/pair")) return;
+
+  const el = document.getElementById("methodproof-pair-data");
+  if (!el) return;
+
+  const sessionId = el.dataset.sessionId;
+  const token = el.dataset.token;
+  const apiBase = el.dataset.apiBase;
+  const e2eKey = el.dataset.e2eKey;
+  if (!sessionId || !token || !apiBase) return;
+
+  chrome.runtime.sendMessage(
+    { type: "activate", session_id: sessionId, token, api_base: apiBase, e2e_key: e2eKey || undefined },
+    () => { window.dispatchEvent(new Event("methodproof-paired")); },
+  );
+}
+
+// --- Bridge discovery: wake background to check for CLI sessions ---
+function triggerDiscovery(): void {
+  chrome.runtime.sendMessage({ type: "check_bridge" }).catch(() => {});
+}
+
 // Run detections on page load
 detectSearch();
 detectAiChat();
 detectMusic();
+detectPairing();
+triggerDiscovery();

@@ -23,4 +23,5 @@ export type ExtensionMessage =
   | { type: "activate"; session_id: string; token: string; api_base: string; e2e_key?: string }
   | { type: "deactivate" }
   | { type: "content_event"; event_type: string; data: Record<string, unknown> }
-  | { type: "get_session" };
+  | { type: "get_session" }
+  | { type: "check_bridge" };

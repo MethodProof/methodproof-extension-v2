@@ -2,8 +2,14 @@
   "manifest_version": 3,
   "name": "MethodProof",
   "version": "0.1.0",
-  "description": "MethodProof assessment telemetry extension",
+  "description": "Capture your engineering process — browser telemetry for MethodProof sessions. Metadata only, no content.",
   "permissions": ["webNavigation", "tabs", "storage", "alarms", "activeTab"],
+  "host_permissions": ["http://127.0.0.1:9877/*", "http://localhost:9877/*"],
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
   "background": {
     "service_worker": "background.js"
   },
@@ -16,8 +22,14 @@
   ],
   "action": {
     "default_popup": "popup/popup.html",
-    "default_title": "MethodProof"
+    "default_title": "MethodProof",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
   },
+  "homepage_url": "https://methodproof.com",
   "externally_connectable": {
     "matches": ["*://localhost/*", "*://*.methodproof.com/*"]
   }

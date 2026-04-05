@@ -8,6 +8,8 @@ import { bufferEvent, flushEvents, syncClock, generateEventId, syncedTimestamp }
 import { computeFingerprint, encryptEventData } from "./lib/crypto";
 
 const FLUSH_ALARM = "methodproof-flush";
+const DISCOVERY_ALARM = "methodproof-discovery";
+const BRIDGE_URL = "http://127.0.0.1:9877";
 let lastActiveDomain = "";
 
 // --- Session management ---
@@ -53,7 +55,11 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
   if (details.frameId !== 0) return;
   if (!details.url.startsWith("http")) return;
   const session = await getSession();
-  if (!session?.active) return;
+  if (!session?.active) {
+    // No session — try to discover a CLI bridge
+    await discoverBridge();
+    return;
+  }
 
   const { url, category } = redactUrl(details.url);
   let title = "";
@@ -100,11 +106,82 @@ chrome.tabs.onActivated.addListener(async (info) => {
   lastActiveDomain = toDomain;
 });
 
+// --- Auto-discovery: poll local bridge for active sessions ---
+
+async function discoverBridge(): Promise<void> {
+  const session = await getSession();
+
+  try {
+    const resp = await fetch(`${BRIDGE_URL}/pair/auto`, { signal: AbortSignal.timeout(1000) });
+    if (!resp.ok) {
+      // Bridge returned error — if we had a session, it ended
+      if (session?.active) {
+        logger.info("session.bridge_lost");
+        await deactivateSession();
+      }
+      return;
+    }
+    const data = await resp.json() as { active?: boolean; session_id?: string; token?: string; api_base?: string; e2e_key?: string };
+    if (!data.active) {
+      if (session?.active) {
+        logger.info("session.bridge_inactive");
+        await deactivateSession();
+      }
+      return;
+    }
+    // Bridge has an active session — connect if we aren't already on this session
+    if (session?.active && session.session_id === data.session_id) return;
+    if (!data.session_id || !data.token || !data.api_base) return;
+    await activateSession(data.session_id, data.token, data.api_base, data.e2e_key);
+    logger.info("session.auto_discovered", { session_id: data.session_id });
+  } catch {
+    // Bridge not reachable — if we had a bridge-paired session, deactivate
+    if (session?.active) {
+      logger.info("session.bridge_unreachable");
+      await deactivateSession();
+    }
+  }
+}
+
+// Fast discovery: poll every 3s until connected, then rely on 30s alarm
+let discoveryInterval: ReturnType<typeof setInterval> | null = null;
+
+function startFastDiscovery(): void {
+  if (discoveryInterval) return;
+  discoverBridge();
+  discoveryInterval = setInterval(async () => {
+    const session = await getSession();
+    if (session?.active) {
+      if (discoveryInterval) { clearInterval(discoveryInterval); discoveryInterval = null; }
+      return;
+    }
+    await discoverBridge();
+  }, 3000);
+}
+
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.alarms.create(DISCOVERY_ALARM, { periodInMinutes: 0.5 });
+  startFastDiscovery();
+});
+
+chrome.runtime.onStartup.addListener(() => {
+  chrome.alarms.create(DISCOVERY_ALARM, { periodInMinutes: 0.5 });
+  startFastDiscovery();
+});
+
+// Also start fast discovery when service worker wakes up (e.g., from alarm)
+startFastDiscovery();
+
 // --- Alarm handler ---
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === FLUSH_ALARM) {
     await flushEvents();
+  } else if (alarm.name === DISCOVERY_ALARM) {
+    await discoverBridge();
+    // Restart fast polling if not connected
+    const session = await getSession();
+    if (!session?.active) startFastDiscovery();
   }
 });
 
@@ -143,6 +220,9 @@ async function handleMessage(message: ExtensionMessage): Promise<unknown> {
       const session = await getSession();
       return session ?? { active: false };
     }
+    case "check_bridge":
+      discoverBridge();
+      return { ok: true };
     default:
       return { ok: false, reason: "unknown_message" };
   }

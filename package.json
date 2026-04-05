@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "webpack --watch --mode development",
     "build": "webpack --mode production",
+    "zip": "npm run build && cd dist && zip -r ../methodproof-extension.zip . && cd .. && echo 'Built: methodproof-extension.zip'",
     "lint": "eslint src/ --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
