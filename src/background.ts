@@ -216,9 +216,14 @@ async function handleMessage(message: ExtensionMessage): Promise<unknown> {
       await bufferEvent(event);
       return { ok: true };
     }
+    case "flush":
+      await flushEvents();
+      return { ok: true };
     case "get_session": {
       const session = await getSession();
-      return session ?? { active: false };
+      const result = await chrome.storage.local.get("events");
+      const pending = ((result.events as BrowserEvent[] | undefined) ?? []).length;
+      return { ...(session ?? { active: false }), pending_count: pending };
     }
     case "check_bridge":
       discoverBridge();

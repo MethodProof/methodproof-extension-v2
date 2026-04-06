@@ -24,4 +24,5 @@ export type ExtensionMessage =
   | { type: "deactivate" }
   | { type: "content_event"; event_type: string; data: Record<string, unknown> }
   | { type: "get_session" }
-  | { type: "check_bridge" };
+  | { type: "check_bridge" }
+  | { type: "flush" };

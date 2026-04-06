@@ -52,6 +52,13 @@ h1 {
   border-left: 2px solid var(--accent);
 }
 
+.pending {
+  font-size: 11px;
+  font-family: "IBM Plex Mono", monospace;
+  color: var(--ink-mid);
+  margin-bottom: 8px;
+}
+
 .btn {
   width: 100%;
   padding: 8px;
@@ -64,6 +71,17 @@ h1 {
   box-shadow: var(--shadow);
 }
 
+.btn-sync {
+  background: var(--surface);
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
 .btn:hover {
   opacity: 0.9;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
