@@ -104,12 +104,22 @@ async function sendBatch(session: SessionState, events: BrowserEvent[]): Promise
       });
 
       if (response.ok) {
-        logger.info("telemetry.flush.success", { count: events.length });
+        const body = (await response.json()) as { accepted?: number; rejected?: number; rejections?: Array<{ event_id: string; reason: string }> };
+        if (body.rejected && body.rejected > 0) {
+          logger.warning("telemetry.flush.partial_reject", {
+            accepted: body.accepted, rejected: body.rejected,
+            rejections: body.rejections?.slice(0, 3),
+          });
+        } else {
+          logger.info("telemetry.flush.success", { count: events.length, accepted: body.accepted });
+        }
         return true;
       }
 
+      const errorBody = await response.text().catch(() => "(unreadable)");
       logger.warning("telemetry.flush.http_error", {
         status: response.status,
+        detail: errorBody.slice(0, 500),
         attempt: attempt + 1,
         max_attempts: RETRY_BACKOFFS.length + 1,
         count: events.length,

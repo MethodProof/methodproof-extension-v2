@@ -12,8 +12,10 @@ document.addEventListener("copy", () => {
   const selection = document.getSelection()?.toString() ?? "";
   if (!selection) return;
   send("browser_copy", {
+    source_url: location.hostname,
     source_domain: location.hostname,
     text_length: selection.length,
+    text_snippet: "",
   });
 });
 
@@ -29,7 +31,7 @@ function detectSearch(): void {
   if (!engine) return;
   const query = new URLSearchParams(location.search).get("q");
   if (!query) return;
-  send("browser_search", { engine, query_length: query.length, word_count: query.split(/\s+/).length });
+  send("browser_search", { engine, query_length: query.length, word_count: query.split(/\s+/).length, result_count: 0 });
 }
 
 // --- AI chat detection (platform only, no URL path) ---
@@ -42,7 +44,7 @@ const AI_PLATFORMS: Record<string, string> = {
 function detectAiChat(): void {
   const platform = AI_PLATFORMS[location.hostname];
   if (!platform) return;
-  send("browser_ai_chat", { platform });
+  send("browser_ai_chat", { platform, url: location.hostname, detected_input: false });
 }
 
 // --- CLI pairing detection (localhost:9877/pair) ---

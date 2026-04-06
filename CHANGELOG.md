@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.1] — 2026-04-06
+
+### Fixed
+- Event schema mismatch: `event_id`/`data` renamed to `id`/`metadata` to match platform `TelemetryEvent` model (was causing 422 rejection on every flush)
+- Added missing required metadata fields for `browser_copy`, `browser_search`, `browser_ai_chat`, `browser_visit` events
+- Telemetry flush now parses response body — logs partial rejections and HTTP error detail instead of status code alone
+
+### Changed
+- Popup redesigned with circuit-node brand art, status dot indicator, and press-effect buttons
+- Sync Now button relabeled to "Connect" when disconnected; triggers bridge discovery instead of flush
+
 ## [0.1.0] — 2026-04-04
 
 ### Added

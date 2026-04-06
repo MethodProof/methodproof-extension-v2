@@ -9,13 +9,13 @@ export interface SessionState {
   e2e_fingerprint?: string;
 }
 
-/** Browser telemetry event */
+/** Browser telemetry event — field names match platform TelemetryEvent schema */
 export interface BrowserEvent {
-  event_id: string;
+  id: string;
   type: string;
   timestamp: string;
   session_id: string;
-  data: Record<string, unknown>;
+  metadata: Record<string, unknown>;
 }
 
 /** Messages between content script, popup, and background */

@@ -80,11 +80,11 @@ async function emitSummary(): Promise<void> {
   if ((metrics.prompts_sent as number) === 0) return;
 
   const event: BrowserEvent = {
-    event_id: generateEventId(),
+    id: generateEventId(),
     type: "ai_usage_summary",
     timestamp: syncedTimestamp(session.clock_offset_ms),
     session_id: session.session_id,
-    data: metrics,
+    metadata: metrics,
   };
   await bufferEvent(event);
 }

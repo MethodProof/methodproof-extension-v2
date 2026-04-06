@@ -72,11 +72,11 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
   }
 
   await bufferEvent({
-    event_id: generateEventId(),
+    id: generateEventId(),
     type: "browser_visit",
     timestamp: syncedTimestamp(session.clock_offset_ms),
     session_id: session.session_id,
-    data: { url, domain: new URL(details.url).hostname, title, category },
+    metadata: { url, domain: new URL(details.url).hostname, title, category, duration_ms: 0 },
   });
 });
 
@@ -97,11 +97,11 @@ chrome.tabs.onActivated.addListener(async (info) => {
   const toCategory = categorizeDomain(toDomain);
 
   await bufferEvent({
-    event_id: generateEventId(),
+    id: generateEventId(),
     type: "browser_tab_switch",
     timestamp: syncedTimestamp(session.clock_offset_ms),
     session_id: session.session_id,
-    data: { from_domain: lastActiveDomain, to_domain: toDomain, to_category: toCategory },
+    metadata: { from_domain: lastActiveDomain, to_domain: toDomain, to_category: toCategory },
   });
   lastActiveDomain = toDomain;
 });
@@ -178,8 +178,9 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === FLUSH_ALARM) {
     await flushEvents();
   } else if (alarm.name === DISCOVERY_ALARM) {
+    // Service worker may have been suspended — clear stale interval reference
+    if (discoveryInterval) { clearInterval(discoveryInterval); discoveryInterval = null; }
     await discoverBridge();
-    // Restart fast polling if not connected
     const session = await getSession();
     if (!session?.active) startFastDiscovery();
   }
@@ -202,16 +203,16 @@ async function handleMessage(message: ExtensionMessage): Promise<unknown> {
     case "content_event": {
       const session = await getSession();
       if (!session?.active) return { ok: false, reason: "no_session" };
-      let data = message.data;
+      let metadata = message.data;
       if (session.e2e_key && session.e2e_fingerprint) {
-        data = await encryptEventData(data, session.e2e_key, session.e2e_fingerprint);
+        metadata = await encryptEventData(metadata, session.e2e_key, session.e2e_fingerprint);
       }
       const event: BrowserEvent = {
-        event_id: generateEventId(),
+        id: generateEventId(),
         type: message.event_type,
         timestamp: syncedTimestamp(session.clock_offset_ms),
         session_id: session.session_id,
-        data,
+        metadata,
       };
       await bufferEvent(event);
       return { ok: true };
