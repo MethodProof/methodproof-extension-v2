@@ -25,6 +25,7 @@ module.exports = {
         { from: "icons/", to: "icons/" },
         { from: "src/popup/popup.html", to: "popup/" },
         { from: "src/popup/popup.css", to: "popup/" },
+        { from: "src/popup/tokens.css", to: "popup/" },
       ],
     }),
   ],

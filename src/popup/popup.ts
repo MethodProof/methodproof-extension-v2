@@ -13,6 +13,8 @@ async function render(): Promise<void> {
   const pendingEl = document.getElementById("pending") as HTMLDivElement;
   const syncBtn = document.getElementById("sync-now") as HTMLButtonElement;
   const endBtn = document.getElementById("end-session") as HTMLButtonElement;
+  const footerDisc = document.getElementById("footer-disconnected") as HTMLImageElement;
+  const footerConn = document.getElementById("footer-connected") as HTMLImageElement;
 
   syncBtn.style.display = "block";
 
@@ -23,6 +25,8 @@ async function render(): Promise<void> {
     captureInfo.style.display = "block";
     endBtn.style.display = "block";
     syncBtn.textContent = "Sync Now";
+    footerDisc.style.display = "none";
+    footerConn.style.display = "block";
 
     const count = response.pending_count ?? 0;
     pendingEl.textContent = count > 0 ? `${count} event${count === 1 ? "" : "s"} pending` : "All synced";
@@ -35,6 +39,8 @@ async function render(): Promise<void> {
     pendingEl.style.display = "none";
     endBtn.style.display = "none";
     syncBtn.textContent = "Connect";
+    footerDisc.style.display = "block";
+    footerConn.style.display = "none";
   }
 }
 

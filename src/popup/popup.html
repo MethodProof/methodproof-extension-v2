@@ -7,48 +7,36 @@
 </head>
 <body>
   <div id="root">
-    <!-- Brand header with circuit nodes -->
-    <div class="header">
-      <svg class="circuit-bg" viewBox="0 0 240 52" xmlns="http://www.w3.org/2000/svg">
-        <!-- Angular branch lines -->
-        <path d="M 20 40 L 20 26 L 56 26" stroke="#e8e6e1" stroke-width="2" fill="none"/>
-        <path d="M 56 26 L 56 12 L 92 12" stroke="#e8e6e1" stroke-width="2" fill="none"/>
-        <path d="M 56 26 L 92 26" stroke="#e8e6e1" stroke-width="2" fill="none"/>
-        <path d="M 92 26 L 92 40 L 120 40" stroke="#e8e6e1" stroke-width="2" fill="none"/>
-        <!-- Nodes -->
-        <circle cx="20" cy="40" r="4" fill="#109446"/>
-        <circle cx="56" cy="26" r="5" fill="#d93326"/>
-        <circle cx="92" cy="12" r="4" fill="#c9a84c"/>
-        <circle cx="92" cy="26" r="3.5" fill="#803794"/>
-        <circle cx="120" cy="40" r="4" fill="#192a56"/>
-        <!-- Dot splatter on vermillion node -->
-        <circle cx="49" cy="21" r="1.5" fill="#d93326" opacity="0.4"/>
-        <circle cx="61" cy="20" r="1.2" fill="#d93326" opacity="0.3"/>
-        <circle cx="52" cy="32" r="1" fill="#d93326" opacity="0.3"/>
-      </svg>
+    <!-- Circuit header (shared both states) -->
+    <img class="circuit-art" src="../icons/circuit-header.svg" alt="" />
+
+    <!-- Wordmark -->
+    <div class="wordmark">
       <h1><span style="font-weight:700">Method</span><span style="font-family:'Laila',serif;font-weight:400">Proof</span></h1>
     </div>
 
-    <div id="status" class="status disconnected">
-      <span class="status-dot"></span>
-      Disconnected
-    </div>
-    <div id="session-id" class="session-id"></div>
-    <div id="capture-info" class="capture-info" style="display:none">
-      Capturing: page visits, tab switches, copy events (metadata only), search activity, AI tool usage.
-      Sensitive sites (banking, email, health) are redacted.
-    </div>
-    <div id="pending" class="pending" style="display:none"></div>
-    <button id="sync-now" class="btn btn-sync" style="display:none">Sync Now</button>
-    <button id="end-session" class="btn" style="display:none">End Session</button>
+    <!-- Ink divider -->
+    <div class="divider"></div>
 
-    <!-- Bottom circuit decoration -->
-    <svg class="circuit-footer" viewBox="0 0 240 16" xmlns="http://www.w3.org/2000/svg">
-      <path d="M 0 8 L 40 8 L 40 2 L 80 2" stroke="#e8e6e1" stroke-width="1.5" fill="none"/>
-      <path d="M 160 14 L 200 14 L 200 8 L 240 8" stroke="#e8e6e1" stroke-width="1.5" fill="none"/>
-      <circle cx="80" cy="2" r="2" fill="#c9a84c" opacity="0.5"/>
-      <circle cx="160" cy="14" r="2" fill="#803794" opacity="0.5"/>
-    </svg>
+    <!-- Content -->
+    <div class="content">
+      <div id="status" class="status disconnected">
+        <span class="status-dot"></span>
+        Disconnected
+      </div>
+      <div id="session-id" class="session-id"></div>
+      <div id="capture-info" class="capture-info" style="display:none">
+        Capturing: page visits, tab switches, copy events (metadata only), search activity, AI tool usage.
+        Sensitive sites (banking, email, health) are redacted.
+      </div>
+      <div id="pending" class="pending" style="display:none"></div>
+      <button id="sync-now" class="btn btn-sync" style="display:none">Connect</button>
+      <button id="end-session" class="btn btn-end" style="display:none">End Session</button>
+    </div>
+
+    <!-- Footer circuits (swap based on state) -->
+    <img id="footer-disconnected" class="circuit-art" src="../icons/footer-disconnected.svg" alt="" />
+    <img id="footer-connected" class="circuit-art" src="../icons/footer-connected.svg" alt="" style="display:none" />
   </div>
   <script src="popup.js"></script>
 </body>

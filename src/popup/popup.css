@@ -1,48 +1,57 @@
-/* Theme tokens — generated from methodproof-tokens/tokens.json */
-/* Run `just tokens` from monorepo root to regenerate */
 @import './tokens.css';
 
 body {
-  width: 240px;
-  padding: 0;
-  font-family: Inter, system-ui, sans-serif;
   margin: 0;
+  padding: 0;
+  width: 280px;
+  font-family: Inter, system-ui, sans-serif;
   background: var(--bg);
   color: var(--ink);
 }
 
 #root {
-  padding: 0 16px 12px;
+  border: 2px solid var(--ink);
 }
 
-/* --- Header with circuit art --- */
+/* --- Figma SVG art --- */
 
-.header {
-  position: relative;
-  padding: 12px 0 0;
-  margin-bottom: 4px;
-}
-
-.circuit-bg {
-  width: 100%;
-  height: 52px;
+.circuit-art {
   display: block;
+  width: 280px;
+  height: auto;
+}
+
+/* --- Wordmark --- */
+
+.wordmark {
+  padding: 0 20px 12px;
 }
 
 h1 {
-  font-size: 15px;
-  margin: 4px 0 0;
+  font-size: 16px;
+  margin: 0;
   font-weight: 600;
-  padding-bottom: 10px;
-  border-bottom: 2px solid var(--ink);
 }
 
-/* --- Status indicator --- */
+/* --- Divider --- */
+
+.divider {
+  height: 2px;
+  background: var(--ink);
+}
+
+/* --- Content area --- */
+
+.content {
+  padding: 14px 20px 16px;
+}
+
+/* --- Status --- */
 
 .status {
   font-size: 13px;
   padding: 8px 10px;
-  margin: 12px 0 8px;
+  margin-bottom: 10px;
   font-weight: 500;
   display: flex;
   align-items: center;
@@ -84,7 +93,7 @@ h1 {
   font-size: 11px;
   font-family: "IBM Plex Mono", monospace;
   color: var(--ink-mid);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   word-break: break-all;
 }
 
@@ -92,7 +101,7 @@ h1 {
   font-size: 10px;
   color: var(--ink-mid);
   line-height: 1.4;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   padding: 6px 8px;
   background: var(--surface);
   border-left: 3px solid var(--accent);
@@ -102,7 +111,7 @@ h1 {
   font-size: 11px;
   font-family: "IBM Plex Mono", monospace;
   color: var(--ink-mid);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 /* --- Buttons --- */
@@ -112,12 +121,10 @@ h1 {
   padding: 10px;
   border: 3px solid var(--ink);
   border-radius: 0;
-  background: var(--accent);
-  color: var(--accent-text);
+  font-family: Inter, system-ui, sans-serif;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 6px 6px 0 var(--ink);
   transition: transform 0.12s, box-shadow 0.12s;
 }
 
@@ -128,40 +135,46 @@ h1 {
   margin-bottom: 8px;
 }
 
+.btn-end {
+  background: var(--accent);
+  color: var(--accent-text);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
 .btn:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 8px 8px 0 var(--ink);
 }
 
 .btn-sync:hover {
   box-shadow: 8px 8px 0 #803794;
 }
 
+.btn-end:hover {
+  box-shadow: 8px 8px 0 var(--ink);
+}
+
 .btn:active {
   transform: translate(3px, 3px);
-  box-shadow: 3px 3px 0 var(--ink);
 }
 
 .btn-sync:active {
   box-shadow: 3px 3px 0 #803794;
 }
 
+.btn-end:active {
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
 .btn:disabled {
   opacity: 0.5;
   cursor: default;
   transform: none;
-  box-shadow: 6px 6px 0 var(--ink);
 }
 
 .btn-sync:disabled {
   box-shadow: 6px 6px 0 #803794;
 }
 
-/* --- Footer circuit decoration --- */
-
-.circuit-footer {
-  width: 100%;
-  height: 16px;
-  display: block;
-  margin-top: 12px;
+.btn-end:disabled {
+  box-shadow: 6px 6px 0 var(--ink);
 }

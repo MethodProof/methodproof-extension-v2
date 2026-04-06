@@ -1,0 +1,25 @@
+<svg width="280" height="100" viewBox="0 0 280 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="280" height="100" fill="#FAF9F7"/>
+<path d="M24 70V42" stroke="#E8E6E1" stroke-width="2"/>
+<path d="M24 42H70" stroke="#E8E6E1" stroke-width="2"/>
+<path d="M70 42V20" stroke="#E8E6E1" stroke-width="2"/>
+<path d="M70 20H120" stroke="#E8E6E1" stroke-width="2"/>
+<path d="M70 42H120" stroke="#E8E6E1" stroke-width="2"/>
+<path d="M120 42V70" stroke="#E8E6E1" stroke-width="2"/>
+<path d="M120 70H160" stroke="#E8E6E1" stroke-width="2"/>
+<path d="M190 28H240" stroke="#E8E6E1" stroke-width="1.5"/>
+<path d="M240 28V55" stroke="#E8E6E1" stroke-width="1.5"/>
+<path d="M240 55H265" stroke="#E8E6E1" stroke-width="1.5"/>
+<circle cx="24" cy="70" r="5" fill="#119446"/>
+<circle cx="70" cy="42" r="6.5" fill="#D93326"/>
+<circle cx="120" cy="20" r="5" fill="#CAA84C"/>
+<circle cx="120" cy="42" r="4.5" fill="#803994"/>
+<circle cx="160" cy="70" r="5" fill="#192A56"/>
+<circle cx="240" cy="28" r="3.5" fill="#CAA84C"/>
+<circle cx="265" cy="55" r="3" fill="#803994"/>
+<circle cx="61" cy="35" r="2" fill="#D93326" fill-opacity="0.4"/>
+<circle cx="77" cy="34" r="1.5" fill="#D93326" fill-opacity="0.3"/>
+<circle cx="65" cy="50" r="1.2" fill="#D93326" fill-opacity="0.3"/>
+<circle cx="113" cy="15" r="1.5" fill="#CAA84C" fill-opacity="0.35"/>
+<circle cx="127" cy="14" r="1.2" fill="#CAA84C" fill-opacity="0.25"/>
+</svg>
