@@ -1,9 +1,23 @@
-/** Shared utilities for AI platform content scripts — structural metrics only, never content */
+/** Shared utilities for AI platform content scripts */
 
 /** Send event to background for telemetry buffering */
 export function sendEvent(eventType: string, data: Record<string, unknown>): void {
   chrome.runtime.sendMessage({ type: "content_event", event_type: eventType, data }).catch(() => {});
 }
+
+/** Check if journal mode is active (caches result for session lifetime) */
+let _journalCache: boolean | null = null;
+export async function isJournal(): Promise<boolean> {
+  if (_journalCache !== null) return _journalCache;
+  try {
+    const resp = await chrome.runtime.sendMessage({ type: "get_session" });
+    _journalCache = resp?.journal ?? false;
+    return _journalCache;
+  } catch { return false; }
+}
+chrome.runtime.onMessage.addListener((msg) => {
+  if (msg?.type === "session_changed") _journalCache = null;
+});
 
 /** Check if AI usage module is enabled (defaults to enabled) */
 export async function isModuleEnabled(): Promise<boolean> {

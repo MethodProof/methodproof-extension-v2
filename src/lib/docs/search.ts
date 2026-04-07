@@ -22,7 +22,9 @@ let resultClicks = 0;
 let firstClickMs = 0;
 let searchStartTime = 0;
 let searchEmitted = false;
-let pendingSearch: { queryLength: number; wordCount: number } | null = null;
+let pendingSearch: { queryLength: number; wordCount: number; rawQuery?: string } | null = null;
+let journalMode = false;
+let _lastRawQuery = "";
 let teardowns: (() => void)[] = [];
 
 function recordSearch(queryLength: number, wordCount: number): void {
@@ -37,20 +39,22 @@ function recordSearch(queryLength: number, wordCount: number): void {
   resultClicks = 0;
   firstClickMs = 0;
   searchEmitted = false;
-  pendingSearch = { queryLength, wordCount };
+  pendingSearch = { queryLength, wordCount, rawQuery: journalMode ? _lastRawQuery : undefined };
 }
 
 function emitSearch(): void {
   if (!site || !emit || !pendingSearch || searchEmitted) return;
   searchEmitted = true;
-  emit("docs_search", {
+  const data: Record<string, unknown> = {
     domain: site.domain,
     query_length: pendingSearch.queryLength,
     word_count: pendingSearch.wordCount,
     results_clicked: resultClicks,
     time_to_first_click_ms: firstClickMs || null,
     refinement_count: refinements,
-  });
+  };
+  if (pendingSearch.rawQuery) data.query = pendingSearch.rawQuery;
+  emit("docs_search", data);
 }
 
 function isNavElement(el: Element | null): boolean {
@@ -78,6 +82,7 @@ function findSearchInput(): HTMLInputElement | null {
 }
 
 function parseQuery(raw: string): { length: number; wordCount: number } {
+  _lastRawQuery = raw;
   return { length: raw.length, wordCount: raw.split(/\s+/).filter(Boolean).length };
 }
 
@@ -110,9 +115,10 @@ function onVisibility(): void {
   if (document.visibilityState === "hidden") emitSearch();
 }
 
-export function startSearchTracking(docsSite: DocsSiteInfo, send: SendFn): void {
+export function startSearchTracking(docsSite: DocsSiteInfo, send: SendFn, journal = false): void {
   site = docsSite;
   emit = send;
+  journalMode = journal;
   detectUrlSearch();
   setupInputTracking();
   document.addEventListener("click", onLinkClick, { passive: true });

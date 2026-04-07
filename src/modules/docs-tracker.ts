@@ -24,8 +24,13 @@ export async function initDocsTracker(): Promise<void> {
   const site = detectDocsSite();
   if (!site) return;
   active = true;
+  let journal = false;
+  try {
+    const resp = await chrome.runtime.sendMessage({ type: "get_session" });
+    journal = resp?.journal ?? false;
+  } catch { /* no session */ }
   startReading(site, send);
-  startSearchTracking(site, send);
+  startSearchTracking(site, send, journal);
 }
 
 /** Destroy docs tracker — cleans up all listeners and emits pending events */

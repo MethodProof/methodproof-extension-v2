@@ -19,13 +19,14 @@ async function getSession(): Promise<SessionState | null> {
   return (result.session as SessionState | undefined) ?? null;
 }
 
-async function activateSession(sessionId: string, token: string, apiBase: string, e2eKey?: string): Promise<void> {
+async function activateSession(sessionId: string, token: string, apiBase: string, e2eKey?: string, journal?: boolean): Promise<void> {
   const session: SessionState = {
     session_id: sessionId,
     token,
     api_base: apiBase,
     clock_offset_ms: 0,
     active: true,
+    journal: journal ?? false,
   };
 
   if (e2eKey) {
@@ -121,7 +122,7 @@ async function discoverBridge(): Promise<void> {
       }
       return;
     }
-    const data = await resp.json() as { active?: boolean; session_id?: string; token?: string; api_base?: string; e2e_key?: string };
+    const data = await resp.json() as { active?: boolean; session_id?: string; token?: string; api_base?: string; e2e_key?: string; journal?: boolean };
     if (!data.active) {
       if (session?.active) {
         logger.info("session.bridge_inactive");
@@ -132,8 +133,8 @@ async function discoverBridge(): Promise<void> {
     // Bridge has an active session — connect if we aren't already on this session
     if (session?.active && session.session_id === data.session_id) return;
     if (!data.session_id || !data.token || !data.api_base) return;
-    await activateSession(data.session_id, data.token, data.api_base, data.e2e_key);
-    logger.info("session.auto_discovered", { session_id: data.session_id });
+    await activateSession(data.session_id, data.token, data.api_base, data.e2e_key, data.journal);
+    logger.info("session.auto_discovered", { session_id: data.session_id, journal: !!data.journal });
   } catch {
     // Bridge not reachable — if we had a bridge-paired session, deactivate
     if (session?.active) {
@@ -195,7 +196,7 @@ function isExtensionMessage(msg: unknown): msg is ExtensionMessage {
 async function handleMessage(message: ExtensionMessage): Promise<unknown> {
   switch (message.type) {
     case "activate":
-      await activateSession(message.session_id, message.token, message.api_base, message.e2e_key);
+      await activateSession(message.session_id, message.token, message.api_base, message.e2e_key, message.journal);
       return { ok: true };
     case "deactivate":
       await deactivateSession();

@@ -1,6 +1,6 @@
-/** GitHub Copilot Chat interaction observer — structural metrics only, never captures content */
+/** GitHub Copilot Chat interaction observer */
 
-import { isModuleEnabled, sendEvent, addMetric, recordPlatform, trackVisibility, getInputLength, waitForStable } from "./shared";
+import { isModuleEnabled, sendEvent, addMetric, recordPlatform, trackVisibility, getInputLength, waitForStable, isJournal } from "./shared";
 
 const PLATFORM = "copilot";
 
@@ -39,7 +39,8 @@ function activate(panel: Element): void {
     const input = getInput();
     if (!input || document.activeElement !== input) return;
     const len = getInputLength(input);
-    if (len > 0) watchResponse(len, Date.now(), getMessages().length, getMessages);
+    const promptText = input?.textContent ?? "";
+    if (len > 0) watchResponse(len, promptText, Date.now(), getMessages().length, getMessages);
   }, true);
 
   // Code suggestion acceptance
@@ -59,7 +60,7 @@ function activate(panel: Element): void {
 }
 
 function watchResponse(
-  promptLen: number, sentAt: number, startCount: number,
+  promptLen: number, promptText: string, sentAt: number, startCount: number,
   getMessages: () => NodeListOf<Element>,
 ): void {
   const poll = setInterval(() => {
@@ -67,12 +68,17 @@ function watchResponse(
     if (msgs.length <= startCount) return;
     clearInterval(poll);
     const last = msgs[msgs.length - 1];
-    waitForStable(() => last, responseLen => {
+    waitForStable(() => last, async responseLen => {
       const waitMs = Date.now() - sentAt;
-      sendEvent("ai_prompt_cycle", {
+      const data: Record<string, unknown> = {
         platform: PLATFORM, prompt_length: promptLen,
         response_length: responseLen, response_wait_ms: waitMs,
-      });
+      };
+      if (await isJournal()) {
+        data.prompt_text = promptText;
+        data.response_text = (last.textContent ?? "").slice(0, 5000);
+      }
+      sendEvent("ai_prompt_cycle", data);
       addMetric("prompts_sent");
       addMetric("total_response_wait_ms", waitMs);
     });

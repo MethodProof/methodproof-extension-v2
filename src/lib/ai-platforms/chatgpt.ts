@@ -1,6 +1,6 @@
 /** ChatGPT interaction observer — structural metrics only, never captures content */
 
-import { isModuleEnabled, sendEvent, addMetric, recordPlatform, trackVisibility, getInputLength, waitForStable } from "./shared";
+import { isModuleEnabled, sendEvent, addMetric, recordPlatform, trackVisibility, getInputLength, waitForStable, isJournal } from "./shared";
 
 const PLATFORM = "chatgpt";
 
@@ -23,7 +23,8 @@ function observePrompts(): void {
   const submit = () => {
     const input = document.querySelector("#prompt-textarea, [contenteditable]");
     const len = getInputLength(input);
-    if (len > 0) watchResponse(len, Date.now(), getResponses().length);
+    const promptText = input?.textContent ?? "";
+    if (len > 0) watchResponse(len, promptText, Date.now(), getResponses().length);
   };
 
   document.addEventListener("keydown", e => {
@@ -37,19 +38,24 @@ function observePrompts(): void {
   }, true);
 }
 
-function watchResponse(promptLen: number, sentAt: number, startCount: number): void {
+function watchResponse(promptLen: number, promptText: string, sentAt: number, startCount: number): void {
   const poll = setInterval(() => {
     const msgs = getResponses();
     if (msgs.length <= startCount) return;
     clearInterval(poll);
     const last = msgs[msgs.length - 1];
-    waitForStable(() => last, responseLen => {
+    waitForStable(() => last, async responseLen => {
       const waitMs = Date.now() - sentAt;
-      sendEvent("ai_prompt_cycle", {
+      const data: Record<string, unknown> = {
         platform: PLATFORM, prompt_length: promptLen,
         response_length: responseLen, response_wait_ms: waitMs,
         model_indicator: detectModel(),
-      });
+      };
+      if (await isJournal()) {
+        data.prompt_text = promptText;
+        data.response_text = (last.textContent ?? "").slice(0, 5000);
+      }
+      sendEvent("ai_prompt_cycle", data);
       addMetric("prompts_sent");
       addMetric("total_response_wait_ms", waitMs);
     });
@@ -63,18 +69,21 @@ function detectModel(): string {
 }
 
 function observeCopyButtons(): void {
-  document.addEventListener("click", e => {
+  document.addEventListener("click", async e => {
     const btn = (e.target as HTMLElement).closest("button");
     if (!btn) return;
     const label = (btn.getAttribute("aria-label") ?? "").toLowerCase();
     if (!label.includes("copy")) return;
     const isCode = !!btn.closest("pre");
     const container = btn.closest('pre, [data-message-author-role="assistant"]');
-    sendEvent("ai_response_accept", {
+    const content = container?.textContent ?? "";
+    const data: Record<string, unknown> = {
       platform: PLATFORM, action: "copy",
       section: isCode ? "code_block" : "response",
-      content_length: container?.textContent?.length ?? 0,
-    });
+      content_length: content.length,
+    };
+    if (await isJournal()) data.content_snippet = content.slice(0, 2000);
+    sendEvent("ai_response_accept", data);
     addMetric("accepts");
   }, true);
 }

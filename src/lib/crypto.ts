@@ -1,7 +1,7 @@
 /** E2E encryption — AES-256-GCM with company-held keys (Web Crypto API) */
 
 const NONCE_BYTES = 12;
-const SENSITIVE_FIELDS = new Set(["prompt_text", "response_text", "command", "output_snippet", "diff", "query"]);
+const SENSITIVE_FIELDS = new Set(["prompt_text", "response_text", "command", "output_snippet", "diff", "query", "text_snippet", "content_snippet"]);
 
 export function isE2EEncrypted(value: unknown): boolean {
   return typeof value === "string" && value.startsWith("e2e:v1:");
