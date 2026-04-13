@@ -11,8 +11,9 @@ export async function isJournal(): Promise<boolean> {
   if (_journalCache !== null) return _journalCache;
   try {
     const resp = await chrome.runtime.sendMessage({ type: "get_session" });
-    _journalCache = resp?.journal ?? false;
-    return _journalCache;
+    const journal: boolean = resp?.journal ?? false;
+    _journalCache = journal;
+    return journal;
   } catch { return false; }
 }
 chrome.runtime.onMessage.addListener((msg) => {
