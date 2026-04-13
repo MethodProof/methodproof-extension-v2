@@ -2,14 +2,14 @@
 /* Source: methodproof-tokens/tokens.json */
 
 :root {
-  --bg: #faf9f7;
-  --surface: #f2f0ec;
+  --bg: #ffffff;
+  --surface: #ffffff;
   --ink: #0a0a0a;
   --ink-mid: #6b6862;
   --ink-faint: #8c8780;
-  --wash: #e8e6e1;
+  --wash: #e5e5e5;
   --accent: #d93326;
-  --accent-text: #faf9f7;
+  --accent-text: #ffffff;
   --border: #0a0a0a;
   --green: #2d7a42;
   --green-faint: #ecf5ef;
